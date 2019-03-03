@@ -78,6 +78,7 @@ from .menuwrapper import Menu #, MenuItemNotEnabled
 
 from ..base_wrapper import BaseWrapper
 from ..base_wrapper import BaseMeta
+from .. import deprecated
 
 
 #====================================================================
@@ -231,7 +232,7 @@ class HwndWrapper(BaseWrapper):
         """
         return handleprops.style(self)
     # Non PEP-8 alias
-    Style = style
+    Style = deprecated(style)
 
     # -----------------------------------------------------------
     def exstyle(self):
@@ -246,7 +247,7 @@ class HwndWrapper(BaseWrapper):
         """
         return handleprops.exstyle(self)
     # Non PEP-8 alias
-    ExStyle = exstyle
+    ExStyle = deprecated(exstyle, deprecated_name='ExStyle')
 
     #------------------------------------------------------------
     def automation_id(self):
@@ -274,21 +275,21 @@ class HwndWrapper(BaseWrapper):
         """
         return handleprops.userdata(self)
     # Non PEP-8 alias
-    UserData = user_data
+    UserData = deprecated(user_data)
 
     # -----------------------------------------------------------
     def context_help_id(self):
         """Return the Context Help ID of the window"""
         return handleprops.contexthelpid(self)
     # Non PEP-8 alias
-    ContextHelpID = context_help_id
+    ContextHelpID = deprecated(context_help_id, deprecated_name='ContextHelpID')
 
     # -----------------------------------------------------------
     def is_active(self):
         """Whether the window is active or not"""
         return self.top_level_parent() == self.get_active()
     # Non PEP-8 alias
-    IsActive = is_active
+    IsActive = deprecated(is_active)
 
     # -----------------------------------------------------------
     def is_unicode(self):
@@ -300,7 +301,7 @@ class HwndWrapper(BaseWrapper):
         """
         return handleprops.isunicode(self)
     # Non PEP-8 alias
-    IsUnicode = is_unicode
+    IsUnicode = deprecated(is_unicode)
 
     # -----------------------------------------------------------
     def client_rect(self):
@@ -318,7 +319,7 @@ class HwndWrapper(BaseWrapper):
         """
         return handleprops.clientrect(self)
     # Non PEP-8 alias
-    ClientRect = client_rect
+    ClientRect = deprecated(client_rect)
 
     # -----------------------------------------------------------
     #def client_to_screen(self, client_point):
@@ -349,21 +350,21 @@ class HwndWrapper(BaseWrapper):
         """
         return handleprops.font(self)
     # Non PEP-8 alias
-    Font = font
+    Font = deprecated(font)
 
     # -----------------------------------------------------------
     def has_style(self, style):
         """Return True if the control has the specified style"""
         return handleprops.has_style(self, style)
     # Non PEP-8 alias
-    HasStyle = has_style
+    HasStyle = deprecated(has_style)
 
     # -----------------------------------------------------------
     def has_exstyle(self, exstyle):
         """Return True if the control has the specified extended style"""
         return handleprops.has_exstyle(self, exstyle)
     # Non PEP-8 alias
-    HasExStyle = has_exstyle
+    HasExStyle = deprecated(has_exstyle, deprecated_name='HasExStyle')
 
     # -----------------------------------------------------------
     def is_dialog(self):
@@ -391,7 +392,7 @@ class HwndWrapper(BaseWrapper):
 
         return [self.client_rect(), ]
     # Non PEP-8 alias
-    ClientRects = client_rects
+    ClientRects = deprecated(client_rects)
 
     # -----------------------------------------------------------
     def fonts(self):
@@ -410,19 +411,19 @@ class HwndWrapper(BaseWrapper):
         """
         return [self.font(), ]
     # Non PEP-8 alias
-    Fonts = fonts
+    Fonts = deprecated(fonts)
 
     # -----------------------------------------------------------
     def send_command(self, commandID):
         return self.send_message(win32defines.WM_COMMAND, commandID)
     # Non PEP-8 alias
-    SendCommand = send_command
+    SendCommand = deprecated(send_command)
 
     # -----------------------------------------------------------
     def post_command(self, commandID):
         return self.post_message(win32defines.WM_COMMAND, commandID)
     # Non PEP-8 alias
-    PostCommand = post_command
+    PostCommand = deprecated(post_command)
 
     # -----------------------------------------------------------
     #def notify(self, code):
@@ -449,12 +450,19 @@ class HwndWrapper(BaseWrapper):
 
     #    return retval
     # Non PEP-8 alias
-    #Notify = notify
+    #Notify = deprecated(notify)
+
+    # -----------------------------------------------------------
+    def _ensure_enough_privileges(self, message_name):
+        """Ensure the Python process has enough rights to send some window messages"""
+        pid = handleprops.processid(self.handle)
+        if not handleprops.has_enough_privileges(pid):
+            raise RuntimeError('Not enough rights to use {} message/function for target process ' \
+                '(to resolve it run the script as Administrator)'.format(message_name))
 
     # -----------------------------------------------------------
     def send_message(self, message, wparam = 0, lparam = 0):
         """Send a message to the control and wait for it to return"""
-        #return win32functions.SendMessage(self, message, wparam, lparam)
         wParamAddress = wparam
         if hasattr(wparam, 'mem_address'):
             wParamAddress = wparam.mem_address
@@ -471,7 +479,7 @@ class HwndWrapper(BaseWrapper):
         return win32gui.SendMessage(self.handle, message, wParamAddress, lParamAddress)
 
     # Non PEP-8 alias
-    SendMessage = send_message
+    SendMessage = deprecated(send_message)
 
     # -----------------------------------------------------------
     def send_chars(self,
@@ -522,13 +530,17 @@ class HwndWrapper(BaseWrapper):
         """
         Silently send keystrokes to the control in an inactive window
 
-        Parses modifiers Shift(+), Control(^), Menu(%) and Sequences like "{TAB}", "{ENTER}"
-        For more information about Sequences and Modifiers navigate to keyboard.py
+        It parses modifiers Shift(+), Control(^), Menu(%) and Sequences like "{TAB}", "{ENTER}"
+        For more information about Sequences and Modifiers navigate to module `keyboard`_
+
+        .. _`keyboard`: pywinauto.keyboard.html
 
         Due to the fact that each application handles input differently and this method
         is meant to be used on inactive windows, it may work only partially depending
         on the target app. If the window being inactive is not essential, use the robust
-        type_keys method.
+        `type_keys`_ method.
+
+        .. _`type_keys`: pywinauto.base_wrapper.html#pywinauto.base_wrapper.BaseWrapper.type_keys
         """
         user32 = ctypes.windll.User32
         PBYTE256 = ctypes.c_ubyte * 256
@@ -669,7 +681,7 @@ class HwndWrapper(BaseWrapper):
 
         return result #result.value
     # Non PEP-8 alias
-    SendMessageTimeout = send_message_timeout
+    SendMessageTimeout = deprecated(send_message_timeout)
 
     # -----------------------------------------------------------
     def post_message(self, message, wparam = 0, lparam = 0):
@@ -677,7 +689,7 @@ class HwndWrapper(BaseWrapper):
         return win32functions.PostMessage(self, message, wparam, lparam)
 
     # Non PEP-8 alias
-    PostMessage = post_message
+    PostMessage = deprecated(post_message)
 
 #    # -----------------------------------------------------------
 #    def notify_menu_select(self, menu_id):
@@ -699,7 +711,7 @@ class HwndWrapper(BaseWrapper):
 #            win32functions.MakeLong(0, menu_id), #wparam
 #            )
     # Non PEP-8 alias
-    #NotifyMenuSelect = notify_menu_select
+    # NotifyMenuSelect = deprecated(notify_menu_select)
 
     # -----------------------------------------------------------
     def notify_parent(self, message, controlID = None):
@@ -712,7 +724,7 @@ class HwndWrapper(BaseWrapper):
             win32functions.MakeLong(message, controlID),
             self)
     # Non PEP-8 alias
-    NotifyParent = notify_parent
+    NotifyParent = deprecated(notify_parent)
 
     # -----------------------------------------------------------
     def __hash__(self):
@@ -738,11 +750,12 @@ class HwndWrapper(BaseWrapper):
         (i.e. it can be hidden beneath another window and it will still work).
         """
         self.verify_actionable()
+        self._ensure_enough_privileges('WM_*BUTTONDOWN/UP')
 
         _perform_click(self, button, pressed, coords, double, absolute=absolute)
         return self
     # Non PEP-8 alias
-    Click = click
+    Click = deprecated(click)
 
     # -----------------------------------------------------------
     def close_click(
@@ -781,7 +794,7 @@ class HwndWrapper(BaseWrapper):
 
         return self
     # Non PEP-8 alias
-    CloseClick = close_click
+    CloseClick = deprecated(close_click)
 
     # -----------------------------------------------------------
     def close_alt_f4(self):
@@ -792,7 +805,7 @@ class HwndWrapper(BaseWrapper):
 
         return self
     # Non PEP-8 alias
-    CloseAltF4 = close_alt_f4
+    CloseAltF4 = deprecated(close_alt_f4)
 
     # -----------------------------------------------------------
     def double_click(
@@ -801,7 +814,7 @@ class HwndWrapper(BaseWrapper):
         _perform_click(self, button, pressed, coords, double = True)
         return self
     # Non PEP-8 alias
-    DoubleClick = double_click
+    DoubleClick = deprecated(double_click)
 
     # -----------------------------------------------------------
     def right_click(
@@ -812,7 +825,7 @@ class HwndWrapper(BaseWrapper):
         _perform_click(self, "right", pressed, coords, button_down = False)
         return self
     # Non PEP-8 alias
-    RightClick = right_click
+    RightClick = deprecated(right_click)
 
     # -----------------------------------------------------------
     def press_mouse(self, button ="left", coords = (0, 0), pressed =""):
@@ -822,7 +835,7 @@ class HwndWrapper(BaseWrapper):
         _perform_click(self, button, pressed, coords, button_down=True, button_up=False)
         return self
     # Non PEP-8 alias
-    PressMouse = press_mouse
+    PressMouse = deprecated(press_mouse)
 
     # -----------------------------------------------------------
     def release_mouse(self, button ="left", coords = (0, 0), pressed =""):
@@ -831,7 +844,7 @@ class HwndWrapper(BaseWrapper):
         _perform_click(self, button, pressed, coords, button_down=False, button_up=True)
         return self
     # Non PEP-8 alias
-    ReleaseMouse = release_mouse
+    ReleaseMouse = deprecated(release_mouse)
 
     # -----------------------------------------------------------
     def move_mouse(self, coords = (0, 0), pressed ="", absolute = False):
@@ -844,7 +857,7 @@ class HwndWrapper(BaseWrapper):
         win32functions.WaitGuiThreadIdle(self)
         return self
     # Non PEP-8 alias
-    MoveMouse = move_mouse
+    MoveMouse = deprecated(move_mouse)
 
     # -----------------------------------------------------------
     def drag_mouse(self, button ="left",
@@ -872,7 +885,7 @@ class HwndWrapper(BaseWrapper):
         time.sleep(Timings.after_drag_n_drop_wait)
         return self
     # Non PEP-8 alias
-    DragMouse = drag_mouse
+    DragMouse = deprecated(drag_mouse)
 
     # -----------------------------------------------------------
     def set_window_text(self, text, append = False):
@@ -889,7 +902,7 @@ class HwndWrapper(BaseWrapper):
         self.actions.log('Set text to the ' + self.friendly_class_name() + ': ' + str(text))
         return self
     # Non PEP-8 alias
-    SetWindowText = set_window_text
+    SetWindowText = deprecated(set_window_text)
 
     # -----------------------------------------------------------
     def debug_message(self, text):
@@ -920,7 +933,7 @@ class HwndWrapper(BaseWrapper):
 
         return self
     # Non PEP-8 alias
-    DebugMessage = debug_message
+    DebugMessage = deprecated(debug_message)
 
     # -----------------------------------------------------------
     def set_transparency(self, alpha = 120):
@@ -931,7 +944,7 @@ class HwndWrapper(BaseWrapper):
         win32gui.SetWindowLong(self.handle, win32defines.GWL_EXSTYLE, self.exstyle() | win32con.WS_EX_LAYERED)
         win32gui.SetLayeredWindowAttributes(self.handle, win32api.RGB(0,0,0), alpha, win32con.LWA_ALPHA)
     # Non PEP-8 alias
-    SetTransparency = set_transparency
+    SetTransparency = deprecated(set_transparency)
 
     # -----------------------------------------------------------
     def popup_window(self):
@@ -947,7 +960,7 @@ class HwndWrapper(BaseWrapper):
 
         return popup
     # Non PEP-8 alias
-    PopupWindow = popup_window
+    PopupWindow = deprecated(popup_window)
 
     # -----------------------------------------------------------
     def owner(self):
@@ -960,7 +973,7 @@ class HwndWrapper(BaseWrapper):
         else:
             return None
     # Non PEP-8 alias
-    Owner = owner
+    Owner = deprecated(owner)
 
     # -----------------------------------------------------------
 #    def context_menu_select(self, path, x = None, y = None):
@@ -969,18 +982,18 @@ class HwndWrapper(BaseWrapper):
 #        #raise NotImplementedError(
 #        #    "HwndWrapper.ContextMenuSelect not implemented yet")
 #    # Non PEP-8 alias
-#    ContextMenuSelect = context_menu_select
+#    ContextMenuSelect = deprecated(context_menu_select)
 
     # -----------------------------------------------------------
     def _menu_handle(self):
-        "Simple Overridable method to get the menu handle"
-        #return win32functions.GetMenu(self) # vvryabov: it doesn't work in 64-bit Python for x64 applications
+        """Simple overridable method to get the menu handle"""
         hMenu = win32gui.GetMenu(self.handle)
         is_main_menu = True
         if not hMenu:
+            self._ensure_enough_privileges('MN_GETHMENU')
             hMenu = self.send_message(self.handle, win32defines.MN_GETHMENU);
             is_main_menu = False
-        return (hMenu, is_main_menu) #win32gui.GetMenu(self.handle)
+        return (hMenu, is_main_menu)
 
     # -----------------------------------------------------------
     def menu(self):
@@ -990,7 +1003,7 @@ class HwndWrapper(BaseWrapper):
             return Menu(self, hMenu, is_main_menu=is_main_menu)
         return None
     # Non PEP-8 alias
-    Menu = menu
+    Menu = deprecated(menu)
 
     # -----------------------------------------------------------
     def menu_item(self, path, exact = False):
@@ -1018,7 +1031,7 @@ class HwndWrapper(BaseWrapper):
 
         raise RuntimeError("There is no menu.")
     # Non PEP-8 alias
-    MenuItem = menu_item
+    MenuItem = deprecated(menu_item)
 
     # -----------------------------------------------------------
     def menu_items(self):
@@ -1036,7 +1049,7 @@ class HwndWrapper(BaseWrapper):
         else:
             return []
     # Non PEP-8 alias
-    MenuItems = menu_items
+    MenuItems = deprecated(menu_items)
 
 #    # -----------------------------------------------------------
 #    def menu_click(self, path):
@@ -1059,7 +1072,7 @@ class HwndWrapper(BaseWrapper):
 #
 #        return self
 #    # Non PEP-8 alias
-#    MenuClick = menu_click
+#    MenuClick = deprecated(menu_click)
 
     # -----------------------------------------------------------
     def menu_select(self, path, exact=False, ):
@@ -1073,7 +1086,7 @@ class HwndWrapper(BaseWrapper):
 
         self.menu_item(path, exact=exact).select()
     # Non PEP-8 alias
-    MenuSelect = menu_select
+    MenuSelect = deprecated(menu_select)
 
     # -----------------------------------------------------------
     def move_window(
@@ -1134,7 +1147,7 @@ class HwndWrapper(BaseWrapper):
         win32functions.WaitGuiThreadIdle(self)
         time.sleep(Timings.after_movewindow_wait)
     # Non PEP-8 alias
-    MoveWindow = move_window
+    MoveWindow = deprecated(move_window)
 
     # -----------------------------------------------------------
     def close(self, wait_time = 0):
@@ -1171,31 +1184,35 @@ class HwndWrapper(BaseWrapper):
 
         self.actions.log('Closed window "{0}"'.format(window_text))
     # Non PEP-8 alias
-    Close = close
+    Close = deprecated(close)
 
     # -----------------------------------------------------------
     def maximize(self):
         """Maximize the window"""
         win32functions.ShowWindow(self, win32defines.SW_MAXIMIZE)
         self.actions.log('Maximized window "{0}"'.format(self.window_text()))
+        return self
     # Non PEP-8 alias
-    Maximize = maximize
+    Maximize = deprecated(maximize)
 
     # -----------------------------------------------------------
     def minimize(self):
         """Minimize the window"""
         win32functions.ShowWindow(self, win32defines.SW_MINIMIZE)
+        # TODO: wait while window is minimized
         self.actions.log('Minimized window "{0}"'.format(self.window_text()))
+        return self
     # Non PEP-8 alias
-    Minimize = minimize
+    Minimize = deprecated(minimize)
 
     # -----------------------------------------------------------
     def restore(self):
         """Restore the window to its previous state (normal or maximized)"""
         win32functions.ShowWindow(self, win32defines.SW_RESTORE)
         self.actions.log('Restored window "{0}"'.format(self.window_text()))
+        return self
     # Non PEP-8 alias
-    Restore = restore
+    Restore = deprecated(restore)
 
     # -----------------------------------------------------------
     def get_show_state(self):
@@ -1221,7 +1238,7 @@ class HwndWrapper(BaseWrapper):
 
         return wp.showCmd
     # Non PEP-8 alias
-    GetShowState = get_show_state
+    GetShowState = deprecated(get_show_state)
 
     # -----------------------------------------------------------
     def is_minimized(self):
@@ -1257,7 +1274,7 @@ class HwndWrapper(BaseWrapper):
         else:
             return None
     # Non PEP-8 alias
-    GetActive = get_active
+    GetActive = deprecated(get_active)
 
     # -----------------------------------------------------------
     def get_focus(self):
@@ -1276,7 +1293,7 @@ class HwndWrapper(BaseWrapper):
 
         return HwndWrapper(gui_info.hwndFocus)
     # Non PEP-8 alias
-    GetFocus = get_focus
+    GetFocus = deprecated(get_focus)
 
     # -----------------------------------------------------------
     def set_focus(self):
@@ -1290,9 +1307,7 @@ class HwndWrapper(BaseWrapper):
         """
         # "steal the focus" if there is another active window
         # otherwise it is already into the foreground and no action required
-        cur_foreground = win32gui.GetForegroundWindow()
-
-        if self.handle != cur_foreground:
+        if not self.has_focus():
             # Notice that we need to move the mouse out of the screen
             # but we don't use the built-in methods of the class:
             # self.mouse_move doesn't do the job well even with absolute=True
@@ -1301,7 +1316,10 @@ class HwndWrapper(BaseWrapper):
 
             # change active window
             if self.is_minimized():
-                win32gui.ShowWindow(self.handle, win32con.SW_RESTORE)
+                if self.was_maximized():
+                    self.maximize()
+                else:
+                    self.restore()
             else:
                 win32gui.ShowWindow(self.handle, win32con.SW_SHOW)
             win32gui.SetForegroundWindow(self.handle)
@@ -1314,7 +1332,11 @@ class HwndWrapper(BaseWrapper):
 
         return self
     # Non PEP-8 alias
-    SetFocus = set_focus
+    SetFocus = deprecated(set_focus)
+
+    def has_focus(self):
+        """Check the window is in focus (foreground)"""
+        return self.handle == win32gui.GetForegroundWindow()
 
     def has_keyboard_focus(self):
         """Check the keyboard focus on this control."""
@@ -1337,7 +1359,6 @@ class HwndWrapper(BaseWrapper):
         win32functions.WaitGuiThreadIdle(self)
 
         time.sleep(Timings.after_setfocus_wait)
-
         return self
 
     # -----------------------------------------------------------
@@ -1372,7 +1393,7 @@ class HwndWrapper(BaseWrapper):
             },
         }
     # Non PEP-8 alias
-    SetApplicationData = set_application_data
+    SetApplicationData = deprecated(set_application_data)
 
     # -----------------------------------------------------------
     def scroll(self, direction, amount, count = 1, retry_interval = None):
@@ -1382,6 +1403,7 @@ class HwndWrapper(BaseWrapper):
         **amount** can be one of "line", "page", "end"
         **count** (optional) the number of times to scroll
         """
+        self._ensure_enough_privileges('WM_HSCROLL/WM_VSCROLL')
 
         # check which message we want to send
         if direction.lower() in ("left", "right"):
@@ -1409,7 +1431,7 @@ class HwndWrapper(BaseWrapper):
 
         return self
     # Non PEP-8 alias
-    Scroll = scroll
+    Scroll = deprecated(scroll)
 
     # -----------------------------------------------------------
     def get_toolbar(self):
@@ -1421,42 +1443,41 @@ class HwndWrapper(BaseWrapper):
 
         return None
     # Non PEP-8 alias
-    GetToolbar = get_toolbar
+    GetToolbar = deprecated(get_toolbar)
 
     # Non PEP-8 aliases for BaseWrapper methods
     # We keep them for the backward compatibility in legacy scripts
-    ClickInput = BaseWrapper.click_input
-    DoubleClickInput = BaseWrapper.double_click_input
-    RightClickInput = BaseWrapper.right_click_input
-    VerifyVisible = BaseWrapper.verify_visible
-    _NeedsImageProp = BaseWrapper._needs_image_prop
-    FriendlyClassName = BaseWrapper.friendly_class_name
-    Class = BaseWrapper.class_name
-    WindowText = BaseWrapper.window_text
-    ControlID = BaseWrapper.control_id
-    IsVisible = BaseWrapper.is_visible
-    IsEnabled = BaseWrapper.is_enabled
-    Rectangle = BaseWrapper.rectangle
-    ClientToScreen = BaseWrapper.client_to_screen
-    ProcessID = BaseWrapper.process_id
-    IsDialog = BaseWrapper.is_dialog
-    Parent = BaseWrapper.parent
-    TopLevelParent = BaseWrapper.top_level_parent
-    Texts = BaseWrapper.texts
-    Children = BaseWrapper.children
-    CaptureAsImage = BaseWrapper.capture_as_image
-    GetProperties = BaseWrapper.get_properties
-    DrawOutline = BaseWrapper.draw_outline
-    IsChild = BaseWrapper.is_child
-    VerifyActionable = BaseWrapper.verify_actionable
-    VerifyEnabled = BaseWrapper.verify_enabled
-    PressMouseInput = BaseWrapper.press_mouse_input
-    ReleaseMouseInput = BaseWrapper.release_mouse_input
-    MoveMouseInput = BaseWrapper.move_mouse_input
-    DragMouseInput = BaseWrapper.drag_mouse_input
-    WheelMouseInput = BaseWrapper.wheel_mouse_input
-    TypeKeys = BaseWrapper.type_keys
-    SetFocus = BaseWrapper.set_focus
+    ClickInput = deprecated(BaseWrapper.click_input)
+    DoubleClickInput = deprecated(BaseWrapper.double_click_input)
+    RightClickInput = deprecated(BaseWrapper.right_click_input)
+    VerifyVisible = deprecated(BaseWrapper.verify_visible)
+    _NeedsImageProp = deprecated(BaseWrapper._needs_image_prop, deprecated_name='_NeedsImageProp')
+    FriendlyClassName = deprecated(BaseWrapper.friendly_class_name)
+    Class = deprecated(BaseWrapper.class_name, deprecated_name='Class')
+    WindowText = deprecated(BaseWrapper.window_text)
+    ControlID = deprecated(BaseWrapper.control_id, deprecated_name='ControlID')
+    IsVisible = deprecated(BaseWrapper.is_visible)
+    IsEnabled = deprecated(BaseWrapper.is_enabled)
+    Rectangle = deprecated(BaseWrapper.rectangle)
+    ClientToScreen = deprecated(BaseWrapper.client_to_screen)
+    ProcessID = deprecated(BaseWrapper.process_id, deprecated_name='ProcessID')
+    IsDialog = deprecated(BaseWrapper.is_dialog)
+    Parent = deprecated(BaseWrapper.parent)
+    TopLevelParent = deprecated(BaseWrapper.top_level_parent)
+    Texts = deprecated(BaseWrapper.texts)
+    Children = deprecated(BaseWrapper.children)
+    CaptureAsImage = deprecated(BaseWrapper.capture_as_image)
+    GetProperties = deprecated(BaseWrapper.get_properties)
+    DrawOutline = deprecated(BaseWrapper.draw_outline)
+    IsChild = deprecated(BaseWrapper.is_child)
+    VerifyActionable = deprecated(BaseWrapper.verify_actionable)
+    VerifyEnabled = deprecated(BaseWrapper.verify_enabled)
+    PressMouseInput = deprecated(BaseWrapper.press_mouse_input)
+    ReleaseMouseInput = deprecated(BaseWrapper.release_mouse_input)
+    MoveMouseInput = deprecated(BaseWrapper.move_mouse_input)
+    DragMouseInput = deprecated(BaseWrapper.drag_mouse_input)
+    WheelMouseInput = deprecated(BaseWrapper.wheel_mouse_input)
+    TypeKeys = deprecated(BaseWrapper.type_keys)
 
 
 #====================================================================
@@ -1509,7 +1530,7 @@ class DialogWrapper(HwndWrapper):
 
         return tests.run_tests(controls, tests_to_run)
     # Non PEP-8 alias
-    RunTests = run_tests
+    RunTests = deprecated(run_tests)
 
     #-----------------------------------------------------------
     def write_to_xml(self, filename):
@@ -1520,7 +1541,7 @@ class DialogWrapper(HwndWrapper):
         from .. import xml_helpers
         xml_helpers.WriteDialogToFile(filename, props)
     # Non PEP-8 alias
-    WriteToXML = write_to_xml
+    WriteToXML = deprecated(write_to_xml)
 
     #-----------------------------------------------------------
     def client_area_rect(self):
@@ -1535,7 +1556,7 @@ class DialogWrapper(HwndWrapper):
         self.send_message(win32defines.WM_NCCALCSIZE, 0, ctypes.byref(rect))
         return rect
     # Non PEP-8 alias
-    ClientAreaRect = client_area_rect
+    ClientAreaRect = deprecated(client_area_rect)
 
     #-----------------------------------------------------------
     def hide_from_taskbar(self):
@@ -1544,7 +1565,7 @@ class DialogWrapper(HwndWrapper):
         win32functions.SetWindowLongPtr(self, win32defines.GWL_EXSTYLE, self.exstyle() | win32defines.WS_EX_TOOLWINDOW)
         win32functions.ShowWindow(self, win32defines.SW_SHOW)
     # Non PEP-8 alias
-    HideFromTaskbar = hide_from_taskbar
+    HideFromTaskbar = deprecated(hide_from_taskbar)
 
     #-----------------------------------------------------------
     def show_in_taskbar(self):
@@ -1554,7 +1575,7 @@ class DialogWrapper(HwndWrapper):
             self.exstyle() | win32defines.WS_EX_APPWINDOW)
         win32functions.ShowWindow(self, win32defines.SW_SHOW)
     # Non PEP-8 alias
-    ShowInTaskbar = show_in_taskbar
+    ShowInTaskbar = deprecated(show_in_taskbar)
 
     #-----------------------------------------------------------
     def is_in_taskbar(self):
@@ -1569,7 +1590,7 @@ class DialogWrapper(HwndWrapper):
         return self.has_exstyle(win32defines.WS_EX_APPWINDOW) or \
                (self.owner() is None and not self.has_exstyle(win32defines.WS_EX_TOOLWINDOW))
     # Non PEP-8 alias
-    IsInTaskbar = is_in_taskbar
+    IsInTaskbar = deprecated(is_in_taskbar)
 
     #-----------------------------------------------------------
     def force_close(self):
@@ -1608,7 +1629,7 @@ class DialogWrapper(HwndWrapper):
 #        [controlproperties.ControlProps(ctrl) for
 #            ctrl in xml_helpers.ReadPropertiesFromFile(handle)]
 #    # Non PEP-8 alias
-#    ReadControlsFromXML = read_controls_from_xml
+#    ReadControlsFromXML = deprecated(read_controls_from_xml)
 
 #    #-----------------------------------------------------------
 #    def add_reference(self, reference):
@@ -1626,7 +1647,7 @@ class DialogWrapper(HwndWrapper):
 #            if ctrl.class_name() != self.children()[i+1].class_name():
 #                print "different classes"
 #    # Non PEP-8 alias
-#    AddReference = add_reference
+#    AddReference = deprecated(add_reference)
 
 
 #====================================================================
@@ -1798,7 +1819,7 @@ def get_dialog_props_from_handle(hwnd):
 
     return props
 # Non PEP-8 alias
-GetDialogPropsFromHandle = get_dialog_props_from_handle
+GetDialogPropsFromHandle = deprecated(get_dialog_props_from_handle)
 
 
 backend.register('win32', HwndElementInfo, HwndWrapper)

@@ -65,12 +65,13 @@ in almost exactly the same ways. ::
 from __future__ import print_function
 
 import sys
-import os.path
+import os
 import pickle
 import time
 import warnings
 import multiprocessing
 import locale
+import codecs
 
 import win32process
 import win32api
@@ -90,6 +91,7 @@ from .backend import registry
 from .actionlogger import ActionLogger
 from .timings import Timings, wait_until, TimeoutError, wait_until_passes
 from .sysinfo import is_x64_Python
+from . import deprecated
 
 
 class AppStartError(Exception):
@@ -154,22 +156,22 @@ class WindowSpecification(object):
 
         if self.backend.name == 'win32':
             # Non PEP-8 aliases for partial backward compatibility
-            self.WrapperObject = self.wrapper_object
-            self.ChildWindow = self.child_window
-            self.Exists = self.exists
-            self.Wait = self.wait
-            self.WaitNot = self.wait_not
-            self.PrintControlIdentifiers = self.print_control_identifiers
+            self.WrapperObject = deprecated(self.wrapper_object)
+            self.ChildWindow = deprecated(self.child_window)
+            self.Exists = deprecated(self.exists)
+            self.Wait = deprecated(self.wait)
+            self.WaitNot = deprecated(self.wait_not)
+            self.PrintControlIdentifiers = deprecated(self.print_control_identifiers)
 
-            self.Window_ = self.window
-            self.window_ = self.window
-            self.Window = self.window
+            self.Window = deprecated(self.child_window, deprecated_name='Window')
+            self.Window_ = deprecated(self.child_window, deprecated_name='Window_')
+            self.window_ = deprecated(self.child_window, deprecated_name='window_')
 
     def __call__(self, *args, **kwargs):
         """No __call__ so return a usefull error"""
         if "best_match" in self.criteria[-1]:
-            raise AttributeError(
-                "WindowSpecification class has no '{0}' method".
+            raise AttributeError("Neither GUI element (wrapper) " \
+                "nor wrapper method '{0}' were found (typo?)".
                 format(self.criteria[-1]['best_match']))
 
         message = (
@@ -659,7 +661,7 @@ class WindowSpecification(object):
             print("Control Identifiers:")
             print_identifiers([this_ctrl, ])
         else:
-            log_file = open(filename, "w")
+            log_file = codecs.open(filename, "w", locale.getpreferredencoding())
 
             def log_func(msg):
                 log_file.write(str(msg) + os.linesep)
@@ -877,14 +879,16 @@ class Application(object):
         self.backend = registry.backends[backend]
         if self.backend.name == 'win32':
             # Non PEP-8 aliases for partial backward compatibility
-            self.Start = self.start
-            self.Connect = self.connect
-            self.CPUUsage = self.cpu_usage
-            self.WaitCPUUsageLower = self.wait_cpu_usage_lower
-            self.top_window_ = self.top_window
-            self.active_ = self.active
-            self.Windows_ = self.windows_ = self.windows
-            self.Window_ = self.window_ = self.window
+            self.Start = deprecated(self.start)
+            self.Connect = deprecated(self.connect)
+            self.CPUUsage = deprecated(self.cpu_usage)
+            self.WaitCPUUsageLower = deprecated(self.wait_cpu_usage_lower, deprecated_name='WaitCPUUsageLower')
+            self.top_window_ = deprecated(self.top_window, deprecated_name='top_window_')
+            self.active_ = deprecated(self.active, deprecated_name='active_')
+            self.Windows_ = deprecated(self.windows, deprecated_name='Windows_')
+            self.windows_ = deprecated(self.windows, deprecated_name='windows_')
+            self.Window_ = deprecated(self.window, deprecated_name='Window_')
+            self.window_ = deprecated(self.window, deprecated_name='window_')
 
         # load the match history if a file was specifed
         # and it exists
@@ -918,7 +922,13 @@ class Application(object):
         connected = False
         if 'process' in kwargs:
             self.process = kwargs['process']
-            assert_valid_process(self.process)
+            try:
+                timings.wait_until_passes(
+                        timeout, retry_interval, assert_valid_process,
+                        ProcessNotFoundError, self.process
+                    )
+            except TimeoutError:
+                raise ProcessNotFoundError('Process with PID={} not found!'.format(self.process))
             connected = True
 
         elif 'handle' in kwargs:
@@ -944,18 +954,29 @@ class Application(object):
 
         elif kwargs:
             kwargs['backend'] = self.backend.name
-            self.process = findwindows.find_element(**kwargs).process_id
+            if 'timeout' in kwargs:
+                del kwargs['timeout']
+                self.process = timings.wait_until_passes(
+                        timeout, retry_interval, findwindows.find_element,
+                        exceptions=(findwindows.ElementNotFoundError, findbestmatch.MatchError,
+                                    controls.InvalidWindowHandle, controls.InvalidElement),
+                        *(), **kwargs
+                    ).process_id
+            else:
+                self.process = findwindows.find_element(**kwargs).process_id
             connected = True
 
         if not connected:
             raise RuntimeError(
-                "You must specify one of process, handle or path")
-        else:
-            if 'path' not in kwargs and 'timeout' in kwargs:
-                raise ValueError('Timeout could be specified with path param only')
+                "You must specify some of process, handle, path or window search criteria.")
 
         if self.backend.name == 'win32':
             self.__warn_incorrect_bitness()
+
+            if not handleprops.has_enough_privileges(self.process):
+                warning_text = "Python process has no rights to make changes " \
+                    "in the target GUI (run the script as Administrator)"
+                warnings.warn(warning_text, UserWarning)
 
         return self
 
@@ -1254,7 +1275,8 @@ class Application(object):
         return killed
 
     # Non PEP-8 aliases
-    kill_ = Kill_ = kill
+    kill_ = deprecated(kill, deprecated_name='kill_')
+    Kill_ = deprecated(kill, deprecated_name='Kill_')
 
     def is_process_running(self):
         """

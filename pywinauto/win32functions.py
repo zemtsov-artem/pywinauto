@@ -32,6 +32,7 @@
 """Defines Windows(tm) functions"""
 
 import ctypes
+from ctypes import wintypes
 from . import win32defines, win32structures
 from .actionlogger import ActionLogger
 from ctypes import c_uint, c_short, c_long
@@ -142,6 +143,7 @@ SendMessageA		=	ctypes.windll.user32.SendMessageA
 PostMessage			=	ctypes.windll.user32.PostMessageW
 GetMessage          =   ctypes.windll.user32.GetMessageW
 RegisterWindowMessage = ctypes.windll.user32.RegisterWindowMessageW
+RegisterWindowMessage.restype = UINT
 
 MoveWindow          =   ctypes.windll.user32.MoveWindow
 EnableWindow        =   ctypes.windll.user32.EnableWindow
@@ -280,8 +282,8 @@ def LoWord(value):
 #====================================================================
 def WaitGuiThreadIdle(handle):
     """Wait until the thread of the specified handle is ready"""
-    process_id = ctypes.c_int()
-    GetWindowThreadProcessId(handle, ctypes.byref(process_id))
+    process_id = wintypes.DWORD(0)
+    GetWindowThreadProcessId(handle, ctypes.POINTER(wintypes.DWORD)(process_id))
 
     # ask the control if it has finished processing the message
     hprocess = OpenProcess(

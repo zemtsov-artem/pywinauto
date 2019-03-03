@@ -39,10 +39,15 @@ import locale
 import re
 import time
 import win32process
+import win32gui
+import win32con
+import win32api
+import win32ui
 import six
+import sys
 
 try:
-    from PIL import ImageGrab
+    from PIL import ImageGrab, Image
 except ImportError:
     ImageGrab = None
 
@@ -52,10 +57,11 @@ from .timings import Timings
 from .actionlogger import ActionLogger
 from .mouse import _perform_click_input
 
+
 #=========================================================================
 def remove_non_alphanumeric_symbols(s):
     """Make text usable for attribute name"""
-    return re.sub("\W", "_", s)
+    return re.sub(r"\W", "_", s)
 
 #=========================================================================
 class InvalidElement(RuntimeError):
@@ -104,7 +110,7 @@ class BaseWrapper(object):
     has_title = True
 
     #------------------------------------------------------------
-    def __new__(cls, element_info):
+    def __new__(cls, element_info, active_backend):
         return BaseWrapper._create_wrapper(cls, element_info, BaseWrapper)
 
     #------------------------------------------------------------
@@ -149,6 +155,23 @@ class BaseWrapper(object):
         else:
             raise RuntimeError('NULL pointer was used to initialize BaseWrapper')
 
+    def __repr_texts(self):
+        """Internal common method to be called from __str__ and __repr__"""
+        module = self.__class__.__module__
+        module = module[module.rfind('.') + 1:]
+
+        type_name = module + "." + self.__class__.__name__
+        title = self.window_text()
+        class_name = self.friendly_class_name()
+        if six.PY2:
+            if hasattr(sys.stdout, 'encoding') and sys.stdout.encoding is not None:
+                # some frameworks override sys.stdout without encoding attribute (Tee Stream),
+                # some users replace sys.stdout with file descriptor which can have None encoding
+                title = title.encode(sys.stdout.encoding, errors='backslashreplace')
+            else:
+                title = title.encode(locale.getpreferredencoding(), errors='backslashreplace')
+        return type_name, title, class_name
+
     def __repr__(self):
         """Representation of the wrapper object
 
@@ -162,7 +185,11 @@ class BaseWrapper(object):
         a windows specification to access the control, while the unique ID is more for
         debugging purposes helping to distinguish between the runtime objects.
         """
-        return '<{0}, {1}>'.format(self.__str__(), self.__hash__())
+        type_name, title, class_name = self.__repr_texts()
+        if six.PY2:
+            return b"<{0} - '{1}', {2}, {3}>".format(type_name, title, class_name, self.__hash__())
+        else:
+            return "<{0} - '{1}', {2}, {3}>".format(type_name, title, class_name, self.__hash__())
 
     def __str__(self):
         """Pretty print representation of the wrapper object
@@ -173,20 +200,13 @@ class BaseWrapper(object):
         * friendly class name of the wrapped control
 
         Notice that the reported title and class name can be used as hints
-        to prepare a windows specification to access the control
+        to prepare a window specification to access the control
         """
-        module = self.__class__.__module__
-        module = module[module.rfind('.') + 1:]
-        type_name = module + "." + self.__class__.__name__
-
-        try:
-            title = self.texts()[0]
-        except IndexError:
-            title = ""
-
-        class_name = self.friendly_class_name()
-
-        return "{0} - '{1}', {2}".format(type_name, title, class_name)
+        type_name, title, class_name = self.__repr_texts()
+        if six.PY2:
+            return b"{0} - '{1}', {2}".format(type_name, title, class_name)
+        else:
+            return "{0} - '{1}', {2}".format(type_name, title, class_name)
 
     def __hash__(self):
         """Returns the hash value of the handle"""
@@ -240,7 +260,7 @@ class BaseWrapper(object):
         of a CheckBox is "Button" - but the friendly class is "CheckBox"
         """
         if self.friendlyclassname is None:
-            self.friendlyclassname = self.element_info.class_name
+            self.friendlyclassname = self.class_name()
         return self.friendlyclassname
 
     #------------------------------------------------------------
@@ -309,6 +329,15 @@ class BaseWrapper(object):
         visible and enabled.
         """
         return self.element_info.enabled #and self.top_level_parent().element_info.enabled
+
+    # -----------------------------------------------------------
+    def was_maximized(self):
+        """Indicate whether the window was maximized before minimizing or not"""
+        if self.handle:
+            (flags, _, _, _, _) = win32gui.GetWindowPlacement(self.handle)
+            return (flags & win32con.WPF_RESTORETOMAXIMIZED == win32con.WPF_RESTORETOMAXIMIZED)
+        else:
+            return None
 
     #------------------------------------------------------------
     def rectangle(self):
@@ -487,17 +516,43 @@ class BaseWrapper(object):
                              "PIL is required for capture_as_image")
             return None
 
-        # get the control rectangle in a way that PIL likes it
         if rect:
-            box = (rect.left, rect.top, rect.right, rect.bottom)
-        else:
-            box = (control_rectangle.left,
-                   control_rectangle.top,
-                   control_rectangle.right,
-                   control_rectangle.bottom)
+            control_rectangle = rect
 
-        # grab the image and get raw data as a string
-        return ImageGrab.grab(box)
+        # get the control rectangle in a way that PIL likes it
+        width = control_rectangle.width()
+        height = control_rectangle.height()
+        left = control_rectangle.left
+        right = control_rectangle.right
+        top = control_rectangle.top
+        bottom = control_rectangle.bottom
+        box = (left, top, right, bottom)
+
+        # check the number of monitors connected
+        if (sys.platform == 'win32') and (len(win32api.EnumDisplayMonitors()) > 1):
+                hwin = win32gui.GetDesktopWindow()
+                hwindc = win32gui.GetWindowDC(hwin)
+                srcdc = win32ui.CreateDCFromHandle(hwindc)
+                memdc = srcdc.CreateCompatibleDC()
+                bmp = win32ui.CreateBitmap()
+                bmp.CreateCompatibleBitmap(srcdc, width, height)
+                memdc.SelectObject(bmp)
+                memdc.BitBlt((0, 0), (width, height), srcdc, (left, top), win32con.SRCCOPY)
+
+                bmpinfo = bmp.GetInfo()
+                bmpstr = bmp.GetBitmapBits(True)
+                pil_img_obj = Image.frombuffer('RGB',
+                                               (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
+                                               bmpstr,
+                                               'raw',
+                                               'BGRX',
+                                               0,
+                                               1)
+        else:
+            # grab the image and get raw data as a string
+            pil_img_obj = ImageGrab.grab(box)
+
+        return pil_img_obj
 
     #-----------------------------------------------------------
     def get_properties(self):
@@ -669,6 +724,9 @@ class BaseWrapper(object):
         """
         if self.is_dialog():
             self.set_focus()
+        if self.backend.name == "win32":
+            self._ensure_enough_privileges('win32api.SetCursorPos(x, y)')
+        # TODO: check it in more general way for both backends
 
         if isinstance(coords, win32structures.RECT):
             coords = coords.mid_point()
@@ -693,11 +751,11 @@ class BaseWrapper(object):
             if ctrl_text is None:
                 ctrl_text = six.text_type(ctrl_text)
             if button.lower() == 'move':
-                message = 'Moved mouse over ' + self.friendly_class_name() + \
-                          ' "' + ctrl_text + '" to screen point ('
+                message = 'Moved mouse over {} "{}" to screen point ('.format(
+                    self.friendly_class_name(), ctrl_text)
             else:
-                message = 'Clicked ' + self.friendly_class_name() + ' "' + ctrl_text + \
-                          '" by ' + str(button) + ' button mouse click at '
+                message = 'Clicked {} "{}" by {} button mouse click at '.format(
+                    self.friendly_class_name(), ctrl_text, button)
                 if double:
                     message = 'Double-c' + message[1:]
             message += str(tuple(coords))
@@ -857,7 +915,7 @@ class BaseWrapper(object):
         turn_off_numlock = True,
         set_foreground = True):
         """
-        Type keys to the element using keyboard.SendKeys
+        Type keys to the element using keyboard.send_keys
 
         This uses the re-written keyboard_ python module where you can
         find documentation on what to use for the **keys**.
@@ -891,7 +949,7 @@ class BaseWrapper(object):
             aligned_keys = six.text_type(keys)
 
         # Play the keys to the active window
-        keyboard.SendKeys(
+        keyboard.send_keys(
             aligned_keys,
             pause,
             with_spaces,
