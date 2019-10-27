@@ -106,11 +106,7 @@ def get_ws_instance():
 
 def running_applications():
     """Return all running apps(system too)"""
-    def runLoopAndExit():
-        AppHelper.stopEventLoop()
-
-    AppHelper.callLater(1, runLoopAndExit)
-    AppHelper.runConsoleEventLoop()
+    cache_update()
     rApps = get_ws_instance().runningApplications()
     return rApps
 
@@ -240,6 +236,13 @@ def filter_list_of_ax_element_by_attr(ui_element_refs_list,attribute_name,attr_e
 def get_desktop():
     # TODO: implement 
     pass
+
+def run_loop_and_exit():
+    AppHelper.stopEventLoop()
+
+def cache_update():
+    AppHelper.callAfter(run_loop_and_exit)
+    AppHelper.runConsoleEventLoop()
 
 def cpu_usage(interval=None):
         """Return CPU usage percent during specified number of seconds"""
