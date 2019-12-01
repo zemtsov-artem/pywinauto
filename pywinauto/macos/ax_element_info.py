@@ -162,7 +162,9 @@ class AxElementInfo(object):
                 print('app info to get pid: ' + str(app))
                 pid = app.processIdentifier()
                 print('found pid: = ' + str(pid))
-                app_ref = cls(AXUIElementCreateApplication(pid))
+                top_level_obj = AXUIElementCreateApplication(pid)
+                print('created top_level_obj: ' + str(top_level_obj))
+                app_ref = cls(top_level_obj)
                 print('created cls: ' + str(app_ref))
                 print('created cls name: ' + str(app_ref.name))
                 # if app_ref.name != '':
