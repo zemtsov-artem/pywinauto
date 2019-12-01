@@ -159,12 +159,12 @@ class AxElementInfo(object):
             appli = ws.runningApplications()
             tab = []
             for app in appli:
-                print('app info to get pid: ' + str(app))
-                pid = app.processIdentifier()
-                print('found pid: = ' + str(pid))
-                top_level_obj = AXUIElementCreateApplication(pid)
-                print('created top_level_obj: ' + str(top_level_obj))
-                app_ref = cls(top_level_obj)
+                # print('app info to get pid: ' + str(app))
+                # pid = app.processIdentifier()
+                # print('found pid: = ' + str(pid))
+                # top_level_obj = AXUIElementCreateApplication(pid)
+                # print('created top_level_obj: ' + str(top_level_obj))
+                app_ref = cls(app)
                 print('created cls: ' + str(app_ref))
                 print('created cls name: ' + str(app_ref.name))
                 # if app_ref.name != '':
@@ -263,7 +263,7 @@ class AxElementInfo(object):
             if (attributes is not None):
                 for attr in attributes:
                     print("obtainable attribute: " + str(attr))
-            role = self._get_ax_attribute_value("AXRole123")
+            role = self._get_ax_attribute_value("AXRole")
         except AXError:
             return 'InvalidControlType'
 
