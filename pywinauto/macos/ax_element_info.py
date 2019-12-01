@@ -19,7 +19,7 @@ from PyObjCTools import AppHelper
 import AppKit
 from AppKit import NSScreen, NSRunningApplication, NSSize, NSPoint
 
-from .macos_functions import get_ws_instance
+from .macos_functions import get_ws_instance, get_list_of_attributes
 
 ax_type_from_string = {
     kAXValueCGSizeType: AppKit.NSSizeFromString,
@@ -257,6 +257,9 @@ class AxElementInfo(object):
         if self.ref is None:
             return"Desktop"
         try:
+            attributes = get_list_of_attributes(self.ref)
+            for attr in attributes:
+                print("obtainable attribute: " + str(attr))
             role = self._get_ax_attribute_value("AXRole")
         except AXError:
             return 'InvalidControlType'

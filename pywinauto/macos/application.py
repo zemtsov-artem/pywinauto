@@ -116,9 +116,9 @@ class Application(BaseApplication):
             macos_functions.cache_update()
             nom = self.ns_app.localizedName()
             elem = ax_element_info.AxElementInfo()
-            print('expected app name: ' + nom)
-            print('created desc elem: ' + str(elem))
-            print('children len = ' + str(len(elem.children())))
+            # print('expected app name: ' + nom)
+            # print('created desc elem: ' + str(elem))
+            # print('children len = ' + str(len(elem.children())))
             for app in elem.children():
                 # print('children name = ' + app.name)
                 # print('children' + str(app))
