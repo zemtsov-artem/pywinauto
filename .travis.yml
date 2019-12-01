@@ -7,10 +7,10 @@ language: cpp
 # used further down the fetch an appropriate Python interpreter).
 matrix:
   include:
-    - os: osx
-      osx_image: xcode8
-      env: PYVER=2.7
-      language: generic
+    # - os: osx
+    #   osx_image: xcode8
+    #   env: PYVER=2.7
+    #   language: generic
     # - os: osx
     #   env: PYVER=3.3
     #   language: generic
@@ -18,29 +18,29 @@ matrix:
       osx_image: xcode8
       env: PYVER=3.4
       language: generic
-    - os: osx
-      osx_image: xcode8
-      env: PYVER=3.5
-      language: generic
-    - os: osx
-      osx_image: xcode8
-      env: PYVER=3.6
-      language: generic
-    - os: linux
-      language: python
-      python: 2.7
+    # - os: osx
+    #   osx_image: xcode8
+    #   env: PYVER=3.5
+    #   language: generic
+    # - os: osx
+    #   osx_image: xcode8
+    #   env: PYVER=3.6
+    #   language: generic
+    # - os: linux
+    #   language: python
+    #   python: 2.7
     # - os: linux
     #   language: python
     #   python: 3.3
-    - os: linux
-      language: python
-      python: 3.4
-    - os: linux
-      language: python
-      python: 3.5
-    - os: linux
-      language: python
-      python: 3.6
+    # - os: linux
+    #   language: python
+    #   python: 3.4
+    # - os: linux
+    #   language: python
+    #   python: 3.5
+    # - os: linux
+    #   language: python
+    #   python: 3.6
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo add-apt-repository -y ppa:beineri/opt-qt58-trusty; fi
@@ -49,7 +49,7 @@ install:
 
   # macOS dev dependencies:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility','com.apple.dt.Xcode-Helper',0,1,1,NULL,NULL);"; fi
-
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility','com.apple.Terminal',0,1,1,NULL,NULL);"; fi
   # Install 'pyenv': a utility for downloading and switching between multiple
   # Python interpreters on the same system.
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then git clone https://github.com/yyuu/pyenv.git ~/.pyenv; fi
