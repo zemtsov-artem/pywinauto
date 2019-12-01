@@ -260,7 +260,7 @@ class AxElementInfo(object):
             return"Desktop"
         try:
             attributes = get_list_of_attributes(self.ref)
-            if (attr is not None):
+            if (attributes is not None):
                 for attr in attributes:
                     print("obtainable attribute: " + str(attr))
             role = self._get_ax_attribute_value("AXRole123")
