@@ -117,11 +117,11 @@ class Application(BaseApplication):
             nom = self.ns_app.localizedName()
             elem = ax_element_info.AxElementInfo()
             print('expected app name: ' + nom)
-            print('created elem: ' + str(elem))
-            # print(elem)
+            print('created desc elem: ' + str(elem))
             print('children len = ' + str(len(elem.children())))
             for app in elem.children():
-                print('children name = ' + app.name)
+                # print('children name = ' + app.name)
+                # print('children' + str(app))
                 if app.name == nom:
                     return True
             return False

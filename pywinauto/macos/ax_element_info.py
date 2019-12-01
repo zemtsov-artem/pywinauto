@@ -150,14 +150,21 @@ class AxElementInfo(object):
         return _cf_attr_to_py_object(self, attrValue)
 
     def children(self):
+        print('//////////////////')
+        print('get children start')
+        print('self.ref is none? - ' + str(self.ref is None))
         if (self.ref is None):
             cls = type(self)
             ws = NSWorkspace.sharedWorkspace()
             appli = ws.runningApplications()
             tab = []
             for app in appli:
+                print('app info to get pid: ' + str(app))
                 pid = app.processIdentifier()
+                print('found pid: = ' + str(pid))
                 app_ref = cls(AXUIElementCreateApplication(pid))
+                print('created cls: ' + str(app_ref))
+                print('created cls name: ' + str(app_ref.name))
                 # if app_ref.name != '':
                 tab.append(app_ref)
             return tab
