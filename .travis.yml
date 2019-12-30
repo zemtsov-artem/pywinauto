@@ -128,6 +128,9 @@ install:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" 'UPDATE access SET allowed = "1"'; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo | sudo python tccutil.py --list; fi
 
+  # Current process info
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo | lsappinfo info `lsappinfo front`; fi
+
   # Check accessibility permissions
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then cd pywinauto/macos/; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo | sudo python macos_functions.py; fi
