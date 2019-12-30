@@ -163,7 +163,7 @@ def verbose_output(*args):
 def list_clients():
     """List items in the database."""
     open_database()
-    c.execute("SELECT client from access")
+    c.execute("SELECT * from access")
     verbose_output("Fetching Entries from Database...\n")
     for row in c.fetchall():
         # print each entry in the Accessibility pane.
