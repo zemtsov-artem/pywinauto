@@ -167,7 +167,11 @@ def list_clients():
     verbose_output("Fetching Entries from Database...\n")
     for row in c.fetchall():
         # print each entry in the Accessibility pane.
-        print(row[0])
+        print("===========")
+        print("App row start")
+        for row_field in row:
+            print(row_field)
+        print("App row end")
     verbose_output("")
 
 
