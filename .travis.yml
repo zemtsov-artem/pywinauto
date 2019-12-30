@@ -82,6 +82,47 @@ install:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.apple.Terminal; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert /Applications/Utilities/Terminal; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable /Applications/Utilities/Terminal; fi
+
+  # test part
+
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert com.apple.loginwindow; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.apple.loginwindow; fi
+
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert com.apple.dock; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.apple.dock; fi
+
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert com.apple.systemuiserver; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.apple.systemuiserver; fi
+
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert com.apple.dock.extra; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.apple.dock.extra; fi
+
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert com.apple.finder; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.apple.finder; fi
+
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert com.apple.AirPlayUIAgent; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.apple.AirPlayUIAgent; fi
+
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert com.apple.iTunesHelper; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.apple.iTunesHelper; fi
+
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert com.apple.notificationcenterui; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.apple.notificationcenterui; fi
+
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert com.apple.Spotlight; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.apple.Spotlight; fi
+
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert com.apple.CoreLocationAgent; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.apple.CoreLocationAgent; fi
+
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert com.security.apple.Keychain-Circle-Notification; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.security.apple.Keychain-Circle-Notification; fi
+
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert com.apple.FolderActionsDispatcher; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.apple.FolderActionsDispatcher; fi
+
+
+  # End of test part
   
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo | sudo python tccutil.py --list; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" 'UPDATE access SET allowed = "1"'; fi
