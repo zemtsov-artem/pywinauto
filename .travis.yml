@@ -48,7 +48,7 @@ before_install:
 install:
 
   # macOS dev dependencies:
-  - echo sudo tccutil.py --list
+  - sudo tccutil.py --list
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility','com.apple.dt.Xcode-Helper',0,1,1,NULL,NULL);"; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility','com.apple.Terminal',0,1,1,NULL,NULL);"; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then PYPATH=\'$(python -c "import sys; print(sys.executable)")\'; fi
