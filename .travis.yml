@@ -16,7 +16,7 @@ matrix:
     #   language: generic
     - os: osx
       osx_image: xcode8
-      env: PYVER=3.4
+      env: PYVER=2.7
       language: generic
     # - os: osx
     #   osx_image: xcode8
@@ -52,16 +52,16 @@ install:
   
   # Install 'pyenv': a utility for downloading and switching between multiple
   # Python interpreters on the same system.
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then git clone https://github.com/yyuu/pyenv.git ~/.pyenv; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then PYENV_ROOT="$HOME/.pyenv"; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then PATH="$PYENV_ROOT/bin:$PATH"; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then eval "$(pyenv init -)"; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then git clone https://github.com/yyuu/pyenv.git ~/.pyenv; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then PYENV_ROOT="$HOME/.pyenv"; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then PATH="$PYENV_ROOT/bin:$PATH"; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then eval "$(pyenv init -)"; fi
   # Install the latest release of the specified Python version using pyenv.
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then PYVER="$(pyenv install --list | grep -E "^\\s*$PYVER" | sort -n -t. -k3 | tail -n1)"; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then pyenv install $PYVER; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then PYVER="$(pyenv install --list | grep -E "^\\s*$PYVER" | sort -n -t. -k3 | tail -n1)"; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then pyenv install $PYVER; fi
   # Make the newly installed version the default "python" command.
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then pyenv global $PYVER; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then python --version; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then pyenv global $PYVER; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then python --version; fi
    # Install PIP
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then curl -O https://bootstrap.pypa.io/get-pip.py; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then python get-pip.py --user; fi
@@ -72,20 +72,20 @@ install:
 
   # Acessibility permissions:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo | system_profiler SPSoftwareDataType; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility','com.apple.dt.Xcode-Helper',0,1,1,NULL,NULL);"; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility','com.apple.Terminal',0,1,1,NULL,NULL);"; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then PYPATH=\'$(python -c "import sys; print(sys.executable)")\'; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo $PYPATH; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility',$PYPATH,1,1,1,NULL,NULL);"; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility','/Applications/Utilities/Terminal',1,1,1,NULL,NULL);"; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility','com.apple.dt.Xcode-Helper',0,1,1,NULL,NULL);"; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility','com.apple.Terminal',0,1,1,NULL,NULL);"; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then PYPATH=\'$(python -c "import sys; print(sys.executable)")\'; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo $PYPATH; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility',$PYPATH,1,1,1,NULL,NULL);"; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility','/Applications/Utilities/Terminal',1,1,1,NULL,NULL);"; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert com.apple.Terminal; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable com.apple.Terminal; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --insert /Applications/Utilities/Terminal; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable /Applications/Utilities/Terminal; fi
   
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo | sudo python tccutil.py --list; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" 'UPDATE access SET allowed = "1"'; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo | sudo python tccutil.py --list; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo | sudo python tccutil.py --list; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" 'UPDATE access SET allowed = "1"'; fi
+  # - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo | sudo python tccutil.py --list; fi
 
   # Check accessibility permissions
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then cd pywinauto/macos/; fi
