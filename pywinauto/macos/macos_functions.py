@@ -142,11 +142,8 @@ def print_list_of_atrributes(ax_element):
     for iter in dir(ax_element):
         print (iter)
 
-def check_is_process_trusted():
-    if not (AXIsProcessTrusted()):
-        if (is_debug):
-            print("Process is not Trusted")
-        exit(-1)
+def is_process_trusted():
+    return AXIsProcessTrusted()
 
 def from_py_objc_to_apple_attribute(pyObjcName):
     return six.text_type(pyObjcName)
@@ -258,5 +255,5 @@ def cpu_usage(interval=None):
         except Exception:
             raise ProcessNotFoundError()
 
-
+print("process is trusted: "+ str(is_process_trusted()))
 
