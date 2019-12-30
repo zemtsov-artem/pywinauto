@@ -55,7 +55,11 @@ install:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo $PYPATH; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility',$PYPATH,1,1,1,NULL,NULL);"; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" "INSERT INTO access VALUES ('kTCCServiceAccessibility','/Applications/Utilities/Terminal',1,1,1,NULL,NULL);"; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py -e com.apple.Terminal; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo tccutil.py --insert com.apple.Terminal; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo tccutil.py --enable com.apple.Terminal; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo tccutil.py --insert /Applications/Utilities/Terminal; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo tccutil.py --enable /Applications/Utilities/Terminal; fi
+  
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo | sudo python tccutil.py --list; fi
   
   # Install 'pyenv': a utility for downloading and switching between multiple
