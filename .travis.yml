@@ -61,7 +61,7 @@ install:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo python tccutil.py --enable /Applications/Utilities/Terminal; fi
   
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo | sudo python tccutil.py --list; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" 'UPDATE access SET allowed = "1"; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then sudo sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" 'UPDATE access SET allowed = "1"'; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then echo | sudo python tccutil.py --list; fi
   
   # Install 'pyenv': a utility for downloading and switching between multiple
