@@ -256,4 +256,5 @@ def cpu_usage(interval=None):
             raise ProcessNotFoundError()
 
 print("process is trusted: "+ str(is_process_trusted()))
+print(running_applications())
 
