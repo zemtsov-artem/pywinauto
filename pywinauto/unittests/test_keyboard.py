@@ -47,7 +47,7 @@ if sys.platform == 'win32':
     from pywinauto.keyboard import KeyAction, VirtualKeyAction, PauseAction
     from pywinauto.sysinfo import is_x64_Python, is_x64_OS
 elif sys.platform == 'darwin':
-    
+
     from pywinauto.macos.macos_functions import launch_application
     from pywinauto.macos.macos_functions import get_instance_of_app
     from pywinauto.macos.macos_functions import read_from_clipboard
