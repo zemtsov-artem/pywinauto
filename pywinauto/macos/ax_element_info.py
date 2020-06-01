@@ -380,7 +380,14 @@ class AxElementInfo(ElementInfo):
             return role
         except AXError:
             return 'InvalidClassName'
-    
+
+    @property
+    def subrole(self):
+        try:
+            return self._get_ax_attribute_value(ax_attributes["Subrole"])
+        except AXError:
+            return ''
+
     @property
     def visible(self):
         # TODO: Implement
