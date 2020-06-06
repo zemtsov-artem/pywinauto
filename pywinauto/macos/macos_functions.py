@@ -44,16 +44,16 @@ from ApplicationServices import AXUIElementCopyAttributeNames
 from ApplicationServices import kAXErrorSuccess
 from ApplicationServices import AXUIElementCopyAttributeValue 
 from ApplicationServices import AXUIElementCopyActionNames
+from ApplicationServices import AXUIElementCopyParameterizedAttributeNames
 from ApplicationServices import AXUIElementPerformAction 
 from ApplicationServices import CGWindowListCopyWindowInfo
-from ApplicationServices import AXUIElementCreateSystemWide
+from ApplicationServices import NSWorkspaceLaunchAllowingClassicStartup
 
 from AppKit import NSScreen
 from AppKit import NSWorkspace
 from AppKit import NSRunningApplication
 from AppKit import NSBundle
 from AppKit import NSWorkspaceLaunchNewInstance
-from AppKit import NSWorkspaceLaunchAllowingClassicStartup
 
 from Foundation import NSAppleEventDescriptor
 from PyObjCTools import AppHelper
@@ -159,6 +159,14 @@ def check_is_process_trusted():
 
 def get_list_of_attributes(ax_element):
     list_of_options_result_with_error_code = AXUIElementCopyAttributeNames(ax_element,None)
+    if not (check_error(list_of_options_result_with_error_code)):
+        list_of_options = list_of_options_result_with_error_code[1]
+        return list_of_options
+    else:
+        return []
+
+def get_list_of_parameterized_attributes(ax_element):
+    list_of_options_result_with_error_code = AXUIElementCopyParameterizedAttributeNames(ax_element,None)
     if not (check_error(list_of_options_result_with_error_code)):
         list_of_options = list_of_options_result_with_error_code[1]
         return list_of_options
